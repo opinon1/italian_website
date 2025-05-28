@@ -1,0 +1,162 @@
+[
+  {
+    "italian": "ciao",
+    "english": "hello",
+    "spanish": "hola",
+    "definition": "A greeting",
+    "sentence": "_____ come stai?",
+    "sentenceTranslation": "Hello, how are you?"
+  },
+  {
+    "italian": "grazie",
+    "english": "thank you",
+    "spanish": "gracias",
+    "definition": "An expression of gratitude",
+    "sentence": "_____ per il tuo aiuto!",
+    "sentenceTranslation": "Thank you for your help!"
+  },
+  {
+    "italian": "prego",
+    "english": "you're welcome",
+    "spanish": "de nada",
+    "definition": "A polite response to 'thank you'",
+    "sentence": "Grazie! - _____!",
+    "sentenceTranslation": "Thank you! - You're welcome!"
+  },
+  {
+    "italian": "si",
+    "english": "yes",
+    "spanish": "si",
+    "definition": "Affirmative response",
+    "sentence": "Vuoi un caffè? - _____!",
+    "sentenceTranslation": "Do you want a coffee? - Yes!"
+  },
+  {
+    "italian": "no",
+    "english": "no",
+    "spanish": "no",
+    "definition": "Negative response",
+    "sentence": "Sei stanco? - _____!",
+    "sentenceTranslation": "Are you tired? - No!"
+  },
+  {
+    "italian": "casa",
+    "english": "house",
+    "spanish": "casa",
+    "definition": "A building where people live",
+    "sentence": "La mia _____ è molto grande.",
+    "sentenceTranslation": "My house is very big."
+  },
+  {
+    "italian": "cibo",
+    "english": "food",
+    "spanish": "comida",
+    "definition": "Something you eat to nourish your body",
+    "sentence": "Il _____ italiano è delizioso.",
+    "sentenceTranslation": "Italian food is delicious."
+  },
+  {
+    "italian": "acqua",
+    "english": "water",
+    "spanish": "agua",
+    "definition": "A clear liquid that you drink",
+    "sentence": "Bevo molta _____ ogni giorno.",
+    "sentenceTranslation": "I drink a lot of water every day."
+  },
+  {
+    "italian": "libro",
+    "english": "book",
+    "spanish": "libro",
+    "definition": "A written work with pages that you read",
+    "sentence": "Sto leggendo un _____ interessante.",
+    "sentenceTranslation": "I am reading an interesting book."
+  },
+  {
+    "italian": "tempo",
+    "english": "time/weather",
+    "spanish": "tiempo",
+    "definition": "The indefinite continued progress of existence or atmospheric conditions",
+    "sentence": "Non ho _____ per studiare oggi.",
+    "sentenceTranslation": "I don't have time to study today."
+  },
+  {
+    "italian": "amico",
+    "english": "friend",
+    "spanish": "amigo",
+    "definition": "A person you like and know well",
+    "sentence": "Il mio migliore _____ vive a Roma.",
+    "sentenceTranslation": "My best friend lives in Rome."
+  },
+  {
+    "italian": "scuola",
+    "english": "school",
+    "spanish": "escuela",
+    "definition": "A place where children go to learn",
+    "sentence": "I bambini vanno a _____ ogni mattina.",
+    "sentenceTranslation": "Children go to school every morning."
+  },
+  {
+    "italian": "lavoro",
+    "english": "work/job",
+    "spanish": "trabajo",
+    "definition": "Activity involving mental or physical effort done to achieve a purpose",
+    "sentence": "Il mio _____ è molto interessante.",
+    "sentenceTranslation": "My work is very interesting."
+  },
+  {
+    "italian": "famiglia",
+    "english": "family",
+    "spanish": "familia",
+    "definition": "A group of people related by blood or marriage",
+    "sentence": "La mia _____ è molto unita.",
+    "sentenceTranslation": "My family is very close."
+  },
+  {
+    "italian": "amore",
+    "english": "love",
+    "spanish": "amor",
+    "definition": "A strong feeling of affection and care",
+    "sentence": "L'_____ è la cosa più importante.",
+    "sentenceTranslation": "Love is the most important thing."
+  },
+  {
+    "italian": "cane",
+    "english": "dog",
+    "spanish": "perro",
+    "definition": "A domesticated carnivorous mammal that is a popular pet",
+    "sentence": "Il mio _____ è molto fedele.",
+    "sentenceTranslation": "My dog is very loyal."
+  },
+  {
+    "italian": "gatto",
+    "english": "cat",
+    "spanish": "gato",
+    "definition": "A small domesticated carnivorous mammal with soft fur",
+    "sentence": "Il _____ dorme sul divano.",
+    "sentenceTranslation": "The cat sleeps on the sofa."
+  },
+  {
+    "italian": "sole",
+    "english": "sun",
+    "spanish": "sol",
+    "definition": "The star around which the earth orbits",
+    "sentence": "Il _____ splende oggi.",
+    "sentenceTranslation": "The sun is shining today."
+  },
+  {
+    "italian": "luna",
+    "english": "moon",
+    "spanish": "luna",
+    "definition": "The natural satellite of the earth",
+    "sentence": "La _____ è piena stasera.",
+    "sentenceTranslation": "The moon is full tonight."
+  },
+  {
+    "italian": "mare",
+    "english": "sea",
+    "spanish": "mar",
+    "definition": "A large body of salt water",
+    "sentence": "Andiamo al _____ in estate.",
+    "sentenceTranslation": "We go to the sea in summer."
+  }
+]
