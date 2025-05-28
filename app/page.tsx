@@ -7,11 +7,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, XCircle, Eye, EyeOff, RotateCcw } from "lucide-react"
-import vocabularyData from "@/data/vocabulary.json"
+import { CheckCircle, XCircle, Eye, EyeOff, RotateCcw, Globe } from "lucide-react"
+import { AVAILABLE_LANGUAGES, type Language } from "@/data/languages"
 
 interface VocabularyItem {
-  italian: string
+  [key: string]: string // This allows for dynamic language keys (italian, german, etc.)
   english: string
   spanish: string
   definition: string
@@ -29,7 +29,9 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return shuffled
 }
 
-export default function ItalianLearningApp() {
+export default function LanguageLearningApp() {
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>(AVAILABLE_LANGUAGES[0])
+  const [vocabularyData, setVocabularyData] = useState<VocabularyItem[]>([])
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [userAnswer, setUserAnswer] = useState("")
   const [showHints, setShowHints] = useState(false)
@@ -40,26 +42,58 @@ export default function ItalianLearningApp() {
   const [shuffledVocabulary, setShuffledVocabulary] = useState<VocabularyItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  // Memoize the full vocabulary to avoid re-importing on every render
-  const fullVocabulary: VocabularyItem[] = useMemo(() => vocabularyData, [])
-
-  // Initialize shuffled vocabulary on component mount
+  // Load vocabulary data when language changes
   useEffect(() => {
-    const initializeQuiz = () => {
+    const loadVocabulary = async () => {
       setIsLoading(true)
-      const shuffled = shuffleArray(fullVocabulary)
-      const sessionQuestions = shuffled.slice(0, Math.min(questionsPerSession, shuffled.length))
-      setShuffledVocabulary(sessionQuestions)
-      setIsLoading(false)
+      try {
+        const response = await fetch(`/data/${selectedLanguage.code}/vocabulary.json`)
+        if (!response.ok) {
+          throw new Error(`Failed to load vocabulary: ${response.status}`)
+        }
+        const data = await response.json()
+        setVocabularyData(data)
+      } catch (error) {
+        console.error("Error loading vocabulary:", error)
+        setVocabularyData([])
+      } finally {
+        setIsLoading(false)
+      }
     }
 
-    initializeQuiz()
+    loadVocabulary()
+  }, [selectedLanguage])
+
+  // Memoize the full vocabulary to avoid re-importing on every render
+  const fullVocabulary: VocabularyItem[] = useMemo(() => vocabularyData, [vocabularyData])
+
+  // Initialize shuffled vocabulary when vocabulary data changes
+  useEffect(() => {
+    if (fullVocabulary.length > 0) {
+      const initializeQuiz = () => {
+        const shuffled = shuffleArray(fullVocabulary)
+        const sessionQuestions = shuffled.slice(0, Math.min(questionsPerSession, shuffled.length))
+        setShuffledVocabulary(sessionQuestions)
+        setCurrentQuestion(0)
+        setUserAnswer("")
+        setShowHints(false)
+        setFeedback(null)
+        setShowAnswer(false)
+        setScore(0)
+        setIsLoading(false)
+      }
+
+      initializeQuiz()
+    }
   }, [fullVocabulary, questionsPerSession])
 
   const currentWord = shuffledVocabulary[currentQuestion]
 
   const checkAnswer = () => {
-    const isCorrect = userAnswer.toLowerCase().trim() === currentWord.italian.toLowerCase()
+    if (!currentWord) return
+
+    const correctAnswer = currentWord[selectedLanguage.wordKey]
+    const isCorrect = userAnswer.toLowerCase().trim() === correctAnswer.toLowerCase()
     setFeedback(isCorrect ? "correct" : "incorrect")
     setShowAnswer(true)
 
@@ -79,17 +113,29 @@ export default function ItalianLearningApp() {
   }
 
   const resetQuiz = () => {
-    setIsLoading(true)
-    const shuffled = shuffleArray(fullVocabulary)
-    const sessionQuestions = shuffled.slice(0, Math.min(questionsPerSession, shuffled.length))
-    setShuffledVocabulary(sessionQuestions)
+    if (fullVocabulary.length > 0) {
+      setIsLoading(true)
+      const shuffled = shuffleArray(fullVocabulary)
+      const sessionQuestions = shuffled.slice(0, Math.min(questionsPerSession, shuffled.length))
+      setShuffledVocabulary(sessionQuestions)
+      setCurrentQuestion(0)
+      setUserAnswer("")
+      setShowHints(false)
+      setFeedback(null)
+      setShowAnswer(false)
+      setScore(0)
+      setIsLoading(false)
+    }
+  }
+
+  const handleLanguageChange = (language: Language) => {
+    setSelectedLanguage(language)
     setCurrentQuestion(0)
     setUserAnswer("")
     setShowHints(false)
     setFeedback(null)
     setShowAnswer(false)
     setScore(0)
-    setIsLoading(false)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -106,9 +152,38 @@ export default function ItalianLearningApp() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">🇮🇹 Learn Italian</h1>
-          <p className="text-gray-600">Practice Italian vocabulary with contextual sentences</p>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+            {selectedLanguage.flag} Learn {selectedLanguage.name}
+          </h1>
+          <p className="text-gray-600">
+            Practice {selectedLanguage.name.toLowerCase()} vocabulary with contextual sentences
+          </p>
         </div>
+
+        {/* Language Selection */}
+        <Card className="mb-4">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Globe className="w-5 h-5 text-gray-600" />
+                <h3 className="font-semibold text-gray-800">Select Language:</h3>
+              </div>
+              <div className="flex gap-2">
+                {AVAILABLE_LANGUAGES.map((language) => (
+                  <Button
+                    key={language.code}
+                    variant={selectedLanguage.code === language.code ? "default" : "outline"}
+                    onClick={() => handleLanguageChange(language)}
+                    className="flex items-center gap-2"
+                  >
+                    <span className="text-lg">{language.flag}</span>
+                    {language.name}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Session Settings */}
         <Card className="mb-4">
@@ -163,16 +238,18 @@ export default function ItalianLearningApp() {
               <div className="flex items-center justify-center py-12">
                 <div className="text-center space-y-4">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto"></div>
-                  <p className="text-gray-600">Preparing your questions...</p>
+                  <p className="text-gray-600">Loading {selectedLanguage.name.toLowerCase()} vocabulary...</p>
                 </div>
               </div>
             ) : !currentWord ? (
               <div className="text-center py-12">
-                <p className="text-gray-600">No vocabulary available. Please check your vocabulary file.</p>
+                <p className="text-gray-600">
+                  No vocabulary available for {selectedLanguage.name}. Please check your vocabulary file.
+                </p>
               </div>
             ) : (
               <>
-                {/* Italian Sentence */}
+                {/* Sentence */}
                 <div className="text-center">
                   <h2 className="text-2xl font-semibold text-gray-800 mb-2">{currentWord.sentence}</h2>
                   <p className="text-gray-600 italic">"{currentWord.sentenceTranslation}"</p>
@@ -212,7 +289,7 @@ export default function ItalianLearningApp() {
                       value={userAnswer}
                       onChange={(e) => setUserAnswer(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      placeholder="Type the missing Italian word..."
+                      placeholder={`Type the missing ${selectedLanguage.name.toLowerCase()} word...`}
                       disabled={showAnswer}
                       className="text-lg"
                     />
@@ -236,7 +313,7 @@ export default function ItalianLearningApp() {
                       <span className="font-semibold">
                         {feedback === "correct"
                           ? "Correct! Well done!"
-                          : `Incorrect. The answer is "${currentWord.italian}"`}
+                          : `Incorrect. The answer is "${currentWord[selectedLanguage.wordKey]}"`}
                       </span>
                     </div>
                   )}
