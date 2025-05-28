@@ -41,6 +41,9 @@ export default function LanguageLearningApp() {
   const [questionsPerSession, setQuestionsPerSession] = useState(10)
   const [shuffledVocabulary, setShuffledVocabulary] = useState<VocabularyItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [wordRangeStart, setWordRangeStart] = useState(1)
+  const [wordRangeEnd, setWordRangeEnd] = useState(50)
+  const [selectedPreset, setSelectedPreset] = useState<string | null>("1-50")
 
   // Load vocabulary data when language changes
   useEffect(() => {
@@ -67,12 +70,22 @@ export default function LanguageLearningApp() {
   // Memoize the full vocabulary to avoid re-importing on every render
   const fullVocabulary: VocabularyItem[] = useMemo(() => vocabularyData, [vocabularyData])
 
-  // Initialize shuffled vocabulary when vocabulary data changes
+  // Initialize shuffled vocabulary when vocabulary data or range changes
   useEffect(() => {
     if (fullVocabulary.length > 0) {
       const initializeQuiz = () => {
-        const shuffled = shuffleArray(fullVocabulary)
+        // Validate and adjust range
+        const maxWords = fullVocabulary.length
+        const validStart = Math.max(1, Math.min(wordRangeStart, maxWords))
+        const validEnd = Math.max(validStart, Math.min(wordRangeEnd, maxWords))
+
+        // Get words in the specified range (convert to 0-based indexing)
+        const rangeVocabulary = fullVocabulary.slice(validStart - 1, validEnd)
+
+        // Shuffle within the selected range
+        const shuffled = shuffleArray(rangeVocabulary)
         const sessionQuestions = shuffled.slice(0, Math.min(questionsPerSession, shuffled.length))
+
         setShuffledVocabulary(sessionQuestions)
         setCurrentQuestion(0)
         setUserAnswer("")
@@ -85,7 +98,7 @@ export default function LanguageLearningApp() {
 
       initializeQuiz()
     }
-  }, [fullVocabulary, questionsPerSession])
+  }, [fullVocabulary, questionsPerSession, wordRangeStart, wordRangeEnd])
 
   const currentWord = shuffledVocabulary[currentQuestion]
 
@@ -115,8 +128,16 @@ export default function LanguageLearningApp() {
   const resetQuiz = () => {
     if (fullVocabulary.length > 0) {
       setIsLoading(true)
-      const shuffled = shuffleArray(fullVocabulary)
+      // Validate and adjust range
+      const maxWords = fullVocabulary.length
+      const validStart = Math.max(1, Math.min(wordRangeStart, maxWords))
+      const validEnd = Math.max(validStart, Math.min(wordRangeEnd, maxWords))
+
+      // Get words in the specified range
+      const rangeVocabulary = fullVocabulary.slice(validStart - 1, validEnd)
+      const shuffled = shuffleArray(rangeVocabulary)
       const sessionQuestions = shuffled.slice(0, Math.min(questionsPerSession, shuffled.length))
+
       setShuffledVocabulary(sessionQuestions)
       setCurrentQuestion(0)
       setUserAnswer("")
@@ -136,6 +157,10 @@ export default function LanguageLearningApp() {
     setFeedback(null)
     setShowAnswer(false)
     setScore(0)
+    // Reset to most common words when switching languages
+    setWordRangeStart(1)
+    setWordRangeEnd(50)
+    setSelectedPreset("1-50") // Reset to default preset
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -187,16 +212,90 @@ export default function LanguageLearningApp() {
 
         {/* Session Settings */}
         <Card className="mb-4">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
+          <CardContent className="pt-6 space-y-4">
+            {/* Word Range Selection */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-gray-800">Word Range (by frequency)</h3>
+              <p className="text-sm text-gray-600">
+                Total vocabulary: {fullVocabulary.length} words • Current range:{" "}
+                {Math.max(1, Math.min(wordRangeStart, fullVocabulary.length))} -{" "}
+                {Math.max(wordRangeStart, Math.min(wordRangeEnd, fullVocabulary.length))} (
+                {Math.max(
+                  0,
+                  Math.min(wordRangeEnd, fullVocabulary.length) -
+                    Math.max(1, Math.min(wordRangeStart, fullVocabulary.length)) +
+                    1,
+                )}{" "}
+                words)
+              </p>
+
+              {/* Preset Range Buttons */}
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: "Essential 1-50", start: 1, end: 50, id: "1-50" },
+                  { label: "Basic 1-100", start: 1, end: 100, id: "1-100" },
+                  { label: "Intermediate 1-200", start: 1, end: 200, id: "1-200" },
+                  { label: "Advanced 1-500", start: 1, end: 500, id: "1-500" },
+                  { label: "Expert 501-1000", start: 501, end: 1000, id: "501-1000" },
+                  { label: "Comprehensive 1-1000", start: 1, end: 1000, id: "1-1000" },
+                  { label: "All Words", start: 1, end: fullVocabulary.length, id: "all" },
+                ].map((preset) => (
+                  <Button
+                    key={preset.id}
+                    variant={selectedPreset === preset.id ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      setWordRangeStart(preset.start)
+                      setWordRangeEnd(Math.min(preset.end, fullVocabulary.length))
+                      setSelectedPreset(preset.id)
+                    }}
+                    disabled={preset.start > fullVocabulary.length}
+                    className={`text-xs transition-all ${
+                      selectedPreset === preset.id ? "bg-blue-600 text-white shadow-md" : "hover:bg-blue-50"
+                    }`}
+                  >
+                    {preset.label}
+                  </Button>
+                ))}
+              </div>
+
+              {/* Custom Range Inputs */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700">Custom range:</label>
+                <Input
+                  type="number"
+                  value={wordRangeStart}
+                  onChange={(e) => {
+                    setWordRangeStart(Math.max(1, Number.parseInt(e.target.value) || 1))
+                    setSelectedPreset(null) // Clear preset selection
+                  }}
+                  min={1}
+                  max={fullVocabulary.length}
+                  className="w-20 text-sm"
+                  disabled={currentQuestion > 0 && !isQuizComplete}
+                />
+                <span className="text-gray-500">to</span>
+                <Input
+                  type="number"
+                  value={wordRangeEnd}
+                  onChange={(e) => {
+                    setWordRangeEnd(Math.max(wordRangeStart, Number.parseInt(e.target.value) || wordRangeStart))
+                    setSelectedPreset(null) // Clear preset selection
+                  }}
+                  min={wordRangeStart}
+                  max={fullVocabulary.length}
+                  className="w-20 text-sm"
+                  disabled={currentQuestion > 0 && !isQuizComplete}
+                />
+              </div>
+            </div>
+
+            {/* Questions Per Session */}
+            <div className="flex items-center justify-between pt-2 border-t">
               <div className="space-y-1">
-                <h3 className="font-semibold text-gray-800">Session Settings</h3>
-                <p className="text-sm text-gray-600">Total vocabulary: {fullVocabulary.length} words</p>
+                <h3 className="font-semibold text-gray-800">Questions per session</h3>
               </div>
               <div className="flex items-center gap-2">
-                <label htmlFor="questions-per-session" className="text-sm font-medium text-gray-700">
-                  Questions per session:
-                </label>
                 <select
                   id="questions-per-session"
                   value={questionsPerSession}
@@ -209,7 +308,9 @@ export default function LanguageLearningApp() {
                   <option value={20}>20</option>
                   <option value={50}>50</option>
                   <option value={100}>100</option>
-                  <option value={fullVocabulary.length}>All ({fullVocabulary.length})</option>
+                  <option value={Math.min(wordRangeEnd - wordRangeStart + 1, fullVocabulary.length)}>
+                    All in range ({Math.min(wordRangeEnd - wordRangeStart + 1, fullVocabulary.length)})
+                  </option>
                 </select>
               </div>
             </div>
