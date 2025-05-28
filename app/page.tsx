@@ -49,10 +49,18 @@ const defaultSettings: AppSettings = {
 }
 
 export default function LanguageLearningApp() {
-  const [settings, setSettings] = useState<AppSettings>(() => {
+  const [settings, setSettings] = useState<AppSettings>(defaultSettings)
+
+  useEffect(() => {
     const storedSettings = localStorage.getItem("app-settings")
-    return storedSettings ? JSON.parse(storedSettings) : defaultSettings
-  })
+    if (storedSettings) {
+      setSettings(JSON.parse(storedSettings))
+    }
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem("app-settings", JSON.stringify(settings))
+  }, [settings])
 
   const [vocabularyData, setVocabularyData] = useState<VocabularyItem[]>([])
   const [currentQuestion, setCurrentQuestion] = useState(0)
@@ -68,11 +76,6 @@ export default function LanguageLearningApp() {
   const [questionsAnswered, setQuestionsAnswered] = useState(0)
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null)
   const { learningMode } = settings
-
-  // Persist settings to localStorage
-  useEffect(() => {
-    localStorage.setItem("app-settings", JSON.stringify(settings))
-  }, [settings])
 
   // Load vocabulary data when language changes
   useEffect(() => {
